@@ -1,0 +1,384 @@
+Step 1: Create Database and Table
+Open MySQL Command Line Interface (CLI):
+
+bash
+Copy code
+
+	mysql -u root -p
+	Create a New Database:
+
+sql
+Copy code
+	CREATE DATABASE ass8;
+	Use the New Database:
+
+sql
+Copy code
+	USE ass8;
+Create a Table with Columns for Name, Age, and City:
+
+sql
+Copy code
+	CREATE TABLE names (
+    	id INT AUTO_INCREMENT PRIMARY KEY,
+    	name VARCHAR(100) NOT NULL,
+    	age INT,
+    	city VARCHAR(100)
+	);
+
+
+Step 2: Install MySQL Connector for Python
+Make sure you have the MySQL connector for Python installed. Since you already have it installed, you can skip this step. If not, you can run:
+
+bash
+Copy code
+	pip install mysql-connector-python
+Step 3: Create a Python Script (ASS8.py)
+Here’s an updated Python script with functions for adding, reading, updating, and deleting records:
+
+python
+Copy code
+
+import mysql.connector
+from mysql.connector import Error
+
+# Database connection configuration
+config = {
+    'user': 'root',               # Your MySQL username
+    'password': 'Aditya@2003',    # Your MySQL password
+    'host': 'localhost',          # MySQL server host
+    'database': 'ass8'            # Database name
+}
+
+def create_connection():
+    """Establish a connection to the MySQL database."""
+    connection = None
+    try:
+        connection = mysql.connector.connect(**config)
+        if connection.is_connected():
+            print("Successfully connected to the MySQL database.")
+    except Error as e:
+        print(f"Error: '{e}'")
+    return connection
+
+def create_name(connection, name, age, city):
+    """Insert a new name along with age and city into the database."""
+    query = "INSERT INTO names (name, age, city) VALUES (%s, %s, %s)"
+    cursor = connection.cursor()
+    cursor.execute(query, (name, age, city))
+    connection.commit()
+    print(f"Name '{name}' with age {age} and city '{city}' has been added to the database.")
+
+def read_names(connection):
+    """Fetch and display all names along with age and city from the database."""
+    query = "SELECT * FROM names"
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    
+    print("Names in the database:")
+    for row in result:
+        print(f"ID: {row[0]}, Name: {row[1]}, Age: {row[2]}, City: {row[3]}")
+
+def update_name(connection, name_id, new_name, new_age, new_city):
+    """Update an existing name along with age and city in the database."""
+    query = "UPDATE names SET name = %s, age = %s, city = %s WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (new_name, new_age, new_city, name_id))
+    connection.commit()
+    print(f"Name ID {name_id} has been updated to '{new_name}' with age {new_age} and city '{new_city}'.")
+
+def delete_name(connection, name_id):
+    """Delete a name from the database by its ID."""
+    query = "DELETE FROM names WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (name_id,))
+    connection.commit()
+    print(f"Name ID {name_id} has been deleted from the database.")
+
+def main():
+    """Main function to execute database operations."""
+    connection = create_connection()
+    
+    if connection is not None:
+        # Adding sample names along with age and city to the database
+        sample_data = [
+            ('Aarav', 25, 'Delhi'), ('Vivaan', 30, 'Mumbai'), ('Aditya', 22, 'Pune'),
+            ('Vihaan', 28, 'Bangalore'), ('Arjun', 24, 'Hyderabad'),
+            ('Sai', 26, 'Chennai'), ('Krishna', 32, 'Kolkata'), ('Ayaan', 29, 'Ahmedabad'),
+            ('Reyansh', 27, 'Lucknow'), ('Lakshay', 23, 'Jaipur')
+        ]
+        
+        # Insert sample data
+        for name, age, city in sample_data:
+            create_name(connection, name, age, city)
+
+        # Read and display names with age and city
+        read_names(connection)
+
+        # Example update: change name of id 1 and update age and city
+        update_name(connection, 1, 'Aarav Kumar', 26, 'Noida')
+
+        # Read and display names after update
+        read_names(connection)
+
+        # Example delete: remove name of id 2
+        delete_name(connection, 2)
+
+        # Read and display names after deletion
+        read_names(connection)
+
+        # Close the database connection
+        connection.close()
+        print("MySQL connection has been closed.")
+
+if __name__ == "__main__":
+    main()
+Step 4: Run Your Python Script
+Navigate to the Directory Where Your Script Is Located:
+
+bash
+Copy code
+cd ~/Documents/DBMS\ CODES
+Run the Script:
+
+bash
+Copy code
+python3 ASS8.py
+Notes
+Ensure that the mysql-connector-python package is installed and that your MySQL server is running.
+You can modify the sample data in the sample_data list to test with different names, ages, and cities.
+After running the script, you should see the output of the operations performed on the database, such as inserting names, updating them, and deleting records.
+By following these steps, you should be able to successfully manage your names database with the new columns for age and city!
+
+
+
+
+
+CREATE USER 'aditya'@'localhost' IDENTIFIED BY 'Aditya@2003';
+GRANT ALL PRIVILEGES ON ass8.* TO 'aditya'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+
+
+
+
+
+
+This Python script is designed to interact with a MySQL database to perform CRUD operations (Create, Read, Update, Delete) on a table called `names` in a database called `ass8`. Below is a detailed explanation of how the script works.
+
+### **1. Importing Required Modules**
+
+```python
+import mysql.connector
+from mysql.connector import Error
+```
+
+- **`mysql.connector`**: This module is used to interact with the MySQL database. It allows Python to connect to MySQL, send queries, and retrieve results.
+- **`Error`**: This is used to handle any MySQL-related exceptions (errors) that might occur during database operations.
+
+### **2. Database Connection Configuration**
+
+```python
+config = {
+    'user': 'aditya',               # Your MySQL username
+    'password': 'Aditya@2003',      # Your MySQL password
+    'host': 'localhost',            # MySQL server host
+    'database': 'ass8'              # Database name
+}
+```
+
+- This `config` dictionary contains the configuration settings required to connect to the MySQL database:
+  - **`user`**: The MySQL username.
+  - **`password`**: The MySQL password for authentication.
+  - **`host`**: The host where the MySQL server is running (in this case, it's `localhost`).
+  - **`database`**: The name of the database to connect to (in this case, `ass8`).
+
+### **3. Establishing a Connection to the Database**
+
+```python
+def create_connection():
+    """Establish a connection to the MySQL database."""
+    connection = None
+    try:
+        connection = mysql.connector.connect(**config)
+        if connection.is_connected():
+            print("Successfully connected to the MySQL database.")
+    except Error as e:
+        print(f"Error: '{e}'")
+    return connection
+```
+
+- **`create_connection()`**: This function establishes a connection to the MySQL database using the credentials provided in the `config` dictionary.
+  - **`mysql.connector.connect(**config)`**: The `connect()` method attempts to connect to the MySQL database using the provided configuration.
+  - **`connection.is_connected()`**: This method checks if the connection was successfully established.
+  - If successful, the message `"Successfully connected to the MySQL database."` is printed.
+  - If an error occurs, it is caught by the `except` block, and the error message is printed.
+
+### **4. Inserting a New Name into the Database**
+
+```python
+def create_name(connection, name, age, city):
+    """Insert a new name along with age and city into the database."""
+    query = "INSERT INTO names (name, age, city) VALUES (%s, %s, %s)"
+    cursor = connection.cursor()
+    cursor.execute(query, (name, age, city))
+    connection.commit()
+    print(f"Name '{name}' with age {age} and city '{city}' has been added to the database.")
+```
+
+- **`create_name(connection, name, age, city)`**: This function inserts a new row into the `names` table with the provided `name`, `age`, and `city`.
+  - **`query = "INSERT INTO names (name, age, city) VALUES (%s, %s, %s)"`**: This SQL query inserts a new record into the `names` table. The `%s` placeholders are used for parameterized queries to avoid SQL injection.
+  - **`cursor = connection.cursor()`**: This creates a cursor object that allows interaction with the MySQL database.
+  - **`cursor.execute(query, (name, age, city))`**: This executes the query, substituting the placeholders with the actual values (`name`, `age`, and `city`).
+  - **`connection.commit()`**: This commits the transaction, making the change permanent in the database.
+  - **`print()`**: After the record is inserted, a confirmation message is printed.
+
+### **5. Reading All Names from the Database**
+
+```python
+def read_names(connection):
+    """Fetch and display all names along with age and city from the database."""
+    query = "SELECT * FROM names"
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    
+    print("Names in the database:")
+    for row in result:
+        print(f"ID: {row[0]}, Name: {row[1]}, Age: {row[2]}, City: {row[3]}")
+```
+
+- **`read_names(connection)`**: This function retrieves and displays all records from the `names` table.
+  - **`query = "SELECT * FROM names"`**: The SQL query selects all rows from the `names` table.
+  - **`cursor.execute(query)`**: This executes the `SELECT` query.
+  - **`result = cursor.fetchall()`**: This fetches all the rows returned by the query and stores them in the `result` variable.
+  - **`for row in result:`**: This iterates through each row in the `result` list and prints the values.
+    - **`row[0]`**: The first value in the row (the `ID`).
+    - **`row[1]`**: The second value in the row (the `name`).
+    - **`row[2]`**: The third value in the row (the `age`).
+    - **`row[3]`**: The fourth value in the row (the `city`).
+
+### **6. Updating an Existing Name in the Database**
+
+```python
+def update_name(connection, name_id, new_name, new_age, new_city):
+    """Update an existing name along with age and city in the database."""
+    query = "UPDATE names SET name = %s, age = %s, city = %s WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (new_name, new_age, new_city, name_id))
+    connection.commit()
+    print(f"Name ID {name_id} has been updated to '{new_name}' with age {new_age} and city '{new_city}'.")
+```
+
+- **`update_name(connection, name_id, new_name, new_age, new_city)`**: This function updates an existing record in the `names` table based on the given `name_id`.
+  - **`query = "UPDATE names SET name = %s, age = %s, city = %s WHERE id = %s"`**: This SQL query updates the `name`, `age`, and `city` columns for a record where the `id` matches the given `name_id`.
+  - **`cursor.execute(query, (new_name, new_age, new_city, name_id))`**: Executes the `UPDATE` query, substituting the placeholders with the new values and the `name_id` of the record to be updated.
+  - **`connection.commit()`**: Commits the change to the database.
+  - **`print()`**: After the record is updated, a confirmation message is printed.
+
+### **7. Deleting a Name from the Database**
+
+```python
+def delete_name(connection, name_id):
+    """Delete a name from the database by its ID."""
+    query = "DELETE FROM names WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (name_id,))
+    connection.commit()
+    print(f"Name ID {name_id} has been deleted from the database.")
+```
+
+- **`delete_name(connection, name_id)`**: This function deletes a record from the `names` table based on the provided `name_id`.
+  - **`query = "DELETE FROM names WHERE id = %s"`**: This SQL query deletes a row where the `id` matches the given `name_id`.
+  - **`cursor.execute(query, (name_id,))`**: Executes the `DELETE` query, substituting the placeholder with the `name_id`.
+  - **`connection.commit()`**: Commits the deletion to the database.
+  - **`print()`**: After the record is deleted, a confirmation message is printed.
+
+### **8. Menu for User Interaction**
+
+```python
+def menu():
+    """Display a menu and execute user-selected option."""
+    print("\nMenu:")
+    print("1. Add Name")
+    print("2. View Names")
+    print("3. Update Name")
+    print("4. Delete Name")
+    print("5. Exit")
+```
+
+- **`menu()`**: This function displays a menu of available options to the user.
+  - The menu includes five choices:
+    1. Add a name to the database.
+    2. View all names in the database.
+    3. Update an existing name.
+    4. Delete a name.
+    5. Exit the program.
+
+### **9. Main Function to Execute Operations**
+
+```python
+def main():
+    """Main function to execute database operations."""
+    connection = create_connection()
+    
+    if connection is not None:
+        while True:
+            menu()
+            choice = input("Enter your choice: ")
+
+            if choice == '1':
+                name = input("Enter name: ")
+                age = int(input("Enter age: "))
+                city = input("Enter city: ")
+                create_name(connection, name, age, city)
+
+            elif choice == '2':
+                read_names(connection)
+
+            elif choice == '3':
+                name_id = int(input("Enter the ID of the name to update: "))
+                new_name = input("Enter new name: ")
+                new_age = int(input("Enter new age: "))
+                new_city = input("Enter new city
+
+: ")
+                update_name(connection, name_id, new_name, new_age, new_city)
+
+            elif choice == '4':
+                name_id = int(input("Enter the ID of the name to delete: "))
+                delete_name(connection, name_id)
+
+            elif choice == '5':
+                print("Exiting the program.")
+                connection.close()
+                break
+
+            else:
+                print("Invalid choice. Please try again.")
+```
+
+- **`main()`**: This function is the entry point for the program.
+  - First, it calls **`create_connection()`** to establish a connection to the MySQL database.
+  - Then, it enters an infinite loop where it displays the menu and processes the user's choice:
+    - If the user selects option `1`, they are prompted to enter a name, age, and city, and the `create_name()` function is called.
+    - If option `2` is selected, it calls `read_names()` to display all names in the database.
+    - If option `3` is selected, it updates an existing name using the `update_name()` function.
+    - If option `4` is selected, it deletes a name using `delete_name()`.
+    - If option `5` is selected, the program exits by closing the connection and breaking out of the loop.
+  - If the user enters an invalid choice, it asks them to try again.
+
+### **10. Running the Program**
+
+```python
+if __name__ == "__main__":
+    main()
+```
+
+- **`if __name__ == "__main__":`**: This ensures that the `main()` function runs when the script is executed directly (not imported as a module).
+- **`main()`**: This starts the program execution.
+
+### **Conclusion**
+This script interacts with a MySQL database to perform CRUD operations on the `names` table. It provides a simple command-line interface for users to add, view, update, and delete records. The `mysql.connector` library is used to manage the database connection, execute queries, and handle errors.

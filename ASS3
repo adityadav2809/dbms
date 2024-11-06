@@ -1,0 +1,41 @@
+ass3 
+CREATE TABLE Customer (c_id INT PRIMARY KEY, name VARCHAR(100), street VARCHAR(100), city VARCHAR(100));
+CREATE TABLE Branch (branch_id INT PRIMARY KEY, branch_name VARCHAR(100), city VARCHAR(100));
+CREATE TABLE Account (account_id INT PRIMARY KEY, c_id INT, branch_id INT, account_type VARCHAR(50), balance DECIMAL(10, 2), FOREIGN KEY (c_id) REFERENCES Customer(c_id), FOREIGN KEY (branch_id) REFERENCES Branch(branch_id));
+INSERT INTO Customer (c_id, name, street, city) VALUES (1, 'Rohit Sharma', '45 Ashok Nagar', 'Mumbai'), (2, 'Anushka Sharma', '123 Park Street', 'Kolkata'), (3, 'Virat Kohli', '78 Main Road', 'Delhi'), (4, 'Sachin Tendulkar', '22 Cricket Lane', 'Mumbai'), (5, 'MS Dhoni', '56 Victory Road', 'Ranchi');              SELECT * FROM Customer;
+INSERT INTO Branch (branch_id, branch_name, city) VALUES (1, 'XYZ', 'Mumbai'), (2, 'ABC', 'Delhi'), (3, 'PQR', 'Bangalore');             SELECT * FROM Branch;
+INSERT INTO Account (account_id, c_id, branch_id, account_type, balance) VALUES (1, 1, 1, 'Savings', 50000), (2, 2, 2, 'Loan', 150000), (3, 3, 1, 'Checking', 30000), (4, 4, 1, 'Loan', 200000), (5, 5, 3, 'Savings', 80000);                   SELECT * FROM Account;
+-- Select specific columns from Customer Table
+SELECT c_id, name FROM Customer;
+-- Select names of customers with loans in Mumbai
+SELECT c.name FROM Customer c JOIN Account a ON c.c_id = a.c_id WHERE a.account_type = 'Loan' AND c.city = 'Mumbai';
+-- Select names starting with 'R'
+SELECT name FROM Customer WHERE name LIKE 'R%';
+-- Update Branch city
+UPDATE Branch SET city = 'Delhi' WHERE branch_name = 'XYZ';
+-- Select all entries from Branch Table to see the updates
+SELECT * FROM Branch;
+-- Update Account balance
+UPDATE Account SET balance = balance + 100000 WHERE c_id = 2 AND account_type = 'Loan';
+-- Select all entries from Account Table to see the updates
+SELECT * FROM Account;
+-- Delete accounts with balance less than 50000
+DELETE FROM Account WHERE balance < 50000;
+-- Select all entries from Account Table to see the updates
+SELECT * FROM Account;
+-- Select names starting with 'R'
+SELECT name FROM Customer WHERE name LIKE 'R%';
+-- Select names of customers with loans across multiple branches
+SELECT c.name FROM Customer c JOIN Account a ON c.c_id = a.c_id WHERE a.account_type = 'Loan' AND a.branch_id IN (1, 2, 3);
+-- Average balance of all accounts
+SELECT AVG(balance) AS average_balance FROM Account;
+-- Maximum and minimum loan balances
+SELECT MAX(balance) AS max_loan, MIN(balance) AS min_loan FROM Account WHERE account_type = 'Loan';
+-- Total balance of all accounts
+SELECT SUM(balance) AS total_balance FROM Account;
+-- Select all customers ordered by name
+SELECT * FROM Customer ORDER BY name ASC;
+-- Union of customers from specific branches
+SELECT name FROM Customer c JOIN Account a ON c.c_id = a.c_id WHERE a.branch_id IN (1, 2) UNION SELECT name FROM Customer c JOIN Account a ON c.c_id = a.c_id WHERE a.branch_id IN (1, 2);
+-- Select customers linked to accounts in specified branches
+SELECT * FROM Customer WHERE c_id IN (SELECT c_id FROM Account WHERE branch_id IN (1, 2));

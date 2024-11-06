@@ -1,0 +1,206 @@
+-- Step 1: Create the Database and Use It
+CREATE DATABASE Score;
+USE Score;
+
+-- Step 2: Create Tables
+CREATE TABLE stud_marks (
+    name VARCHAR(20),
+    total_marks INT(5)
+);
+
+CREATE TABLE Result (
+    roll_no INT(3) PRIMARY KEY,
+    name VARCHAR(20),
+    class VARCHAR(20)
+);
+
+-- Step 3: Insert Data into stud_marks
+INSERT INTO stud_marks VALUES ('Suresh', 995);
+INSERT INTO stud_marks VALUES ('Harish', 865);
+INSERT INTO stud_marks VALUES ('Samart', 920);
+INSERT INTO stud_marks VALUES ('Mohan', 1000);
+INSERT INTO stud_marks VALUES ('Soham', 745);
+
+-- Step 4: View Data in stud_marks
+SELECT * FROM stud_marks;
+
+-- Step 5: Insert Data into Result
+INSERT INTO Result (roll_no, name) VALUES (1, 'Suresh');
+INSERT INTO Result (roll_no, name) VALUES (2, 'Harish');
+INSERT INTO Result (roll_no, name) VALUES (3, 'Samart');
+INSERT INTO Result (roll_no, name) VALUES (4, 'Mohan');
+INSERT INTO Result (roll_no, name) VALUES (5, 'Soham');
+
+-- Step 6: View Data in Result
+SELECT * FROM Result;
+
+-- Step 7: Create Procedure for Grade Assignment
+DELIMITER //
+CREATE PROCEDURE proc_Grade(IN r INT, OUT grade VARCHAR(25))
+BEGIN
+    DECLARE m INT;
+    -- Retrieve total_marks from stud_marks using the roll number
+    SELECT total_marks INTO m 
+    FROM stud_marks 
+    WHERE name = (SELECT name FROM Result WHERE roll_no = r);
+    
+    -- Assign grade based on marks
+    IF m >= 990 AND m <= 1500 THEN
+        SET grade = 'Distinction';
+        UPDATE Result SET class = 'Distinction' WHERE roll_no = r;
+    ELSEIF m >= 900 AND m <= 989 THEN
+        SET grade = 'FirstClass';
+        UPDATE Result SET class = 'FirstClass' WHERE roll_no = r;
+    ELSEIF m >= 825 AND m <= 899 THEN
+        SET grade = 'SecondClass';
+        UPDATE Result SET class = 'SecondClass' WHERE roll_no = r;
+    ELSE
+        SET grade = 'No Category';
+        UPDATE Result SET class = 'No Category' WHERE roll_no = r;
+    END IF;
+END //
+DELIMITER ;
+
+-- Step 8: Create Function to Get Grade
+DELIMITER //
+CREATE FUNCTION func_Grade(r INT) RETURNS VARCHAR(25) DETERMINISTIC
+BEGIN
+    DECLARE grade VARCHAR(25);
+    CALL proc_Grade(r, grade);
+    RETURN grade;
+END //
+DELIMITER ;
+
+-- Step 9: Test the Function with Various Roll Numbers
+SELECT func_Grade(1);
+SELECT func_Grade(2);
+SELECT func_Grade(3);
+SELECT func_Grade(4);
+SELECT func_Grade(5);
+
+-- Step 10: View Updated Data in Result Table
+SELECT * FROM Result;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **Step 7: Create Procedure for Grade Assignment**
+
+```sql
+DELIMITER //
+CREATE PROCEDURE proc_Grade(IN r INT, OUT grade VARCHAR(25))
+BEGIN
+    DECLARE m INT;
+    -- Retrieve total_marks from stud_marks using the roll number
+    SELECT total_marks INTO m 
+    FROM stud_marks 
+    WHERE name = (SELECT name FROM Result WHERE roll_no = r);
+    
+    -- Assign grade based on marks
+    IF m >= 990 AND m <= 1500 THEN
+        SET grade = 'Distinction';
+        UPDATE Result SET class = 'Distinction' WHERE roll_no = r;
+    ELSEIF m >= 900 AND m <= 989 THEN
+        SET grade = 'FirstClass';
+        UPDATE Result SET class = 'FirstClass' WHERE roll_no = r;
+    ELSEIF m >= 825 AND m <= 899 THEN
+        SET grade = 'SecondClass';
+        UPDATE Result SET class = 'SecondClass' WHERE roll_no = r;
+    ELSE
+        SET grade = 'No Category';
+        UPDATE Result SET class = 'No Category' WHERE roll_no = r;
+    END IF;
+END //
+DELIMITER ;
+```
+- **`DELIMITER //`**: Changes the delimiter from the default semicolon (`;`) to `//` to allow the creation of a stored procedure. This avoids conflicts with semicolons inside the procedure.
+  
+- **`CREATE PROCEDURE proc_Grade`**: This defines a stored procedure called `proc_Grade`. The procedure takes an input parameter `r` (roll number) and an output parameter `grade` (the grade assigned to the student).
+  
+  - **`DECLARE m INT;`**: Declares a local variable `m` to store the total marks of the student.
+  
+  - **`SELECT total_marks INTO m`**: This query retrieves the total marks of the student with the given roll number (`r`). It does so by first looking up the `name` in the `Result` table (via the roll number) and then matching it with the `stud_marks` table.
+  
+  - **`IF-ELSEIF-ELSE`**: This block assigns a grade based on the retrieved `m` (total_marks):
+    - **`IF m >= 990 AND m <= 1500 THEN`**: If the marks are between 990 and 1500, the grade is `Distinction`.
+    - **`ELSEIF m >= 900 AND m <= 989 THEN`**: If the marks are between 900 and 989, the grade is `FirstClass`.
+    - **`ELSEIF m >= 825 AND m <= 899 THEN`**: If the marks are between 825 and 899, the grade is `SecondClass`.
+    - **`ELSE`**: For marks below 825, the grade is `No Category`.
+  
+  - **`UPDATE Result SET class = ...`**: For each grade category, the `Result` table's `class` column is updated with the respective grade for the student with roll number `r`.
+  
+- **`END //`**: Ends the stored procedure definition.
+- **`DELIMITER ;`**: Resets the delimiter back to the default semicolon (`;`).
+
+---
+
+### **Step 8: Create Function to Get Grade**
+
+```sql
+DELIMITER //
+CREATE FUNCTION func_Grade(r INT) RETURNS VARCHAR(25) DETERMINISTIC
+BEGIN
+    DECLARE grade VARCHAR(25);
+    CALL proc_Grade(r, grade);
+    RETURN grade;
+END //
+DELIMITER ;
+```
+- **`CREATE FUNCTION func_Grade`**: This creates a function `func_Grade` that takes an input parameter `r` (roll number) and returns a grade. It internally calls the previously created stored procedure `proc_Grade` to assign the grade.
+  - **`DECLARE grade VARCHAR(25);`**: Declares a local variable `grade` to store the grade that will be returned.
+  - **`CALL proc_Grade(r, grade);`**: Calls the `proc_Grade` procedure, passing the roll number `r` to determine the student's grade.
+  - **`RETURN grade;`**: Returns the assigned grade.
+  
+- **`DELIMITER ;`**: Resets the delimiter to the default semicolon (`;`).
+
+---
+
+### **Step 9: Test the Function with Various Roll Numbers**
+
+```sql
+SELECT func_Grade(1);
+SELECT func_Grade(2);
+SELECT func_Grade(3);
+SELECT func_Grade(4);
+SELECT func_Grade(5);
+```
+- These `SELECT` statements call the `func_Grade` function for each student using their roll numbers (1 to 5) to retrieve and display their grades.
+
+---
+
+### **Step 10: View Updated Data in `Result` Table**
+
+```sql
+SELECT * FROM Result;
+```
+- This query retrieves all the data from the `Result` table, which will now include the grades (class) assigned to each student based on their marks.
+
+---
+
+### **Summary:**
+- The script creates a database `Score` and two tables: `stud_marks` for storing student marks and `Result` for storing student roll numbers, names, and their grades.
+- The procedure `proc_Grade` calculates and assigns grades based on total marks, and updates the `Result` table with categories like "Dist
+
+inction" or "FirstClass".
+- A function `func_Grade` calls the procedure and returns the grade for any roll number.
+- The script then tests the function and finally displays the updated `Result` table.

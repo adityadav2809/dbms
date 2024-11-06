@@ -1,0 +1,300 @@
+Here are the SQL statements based on your requirements:
+
+### 1. SQL DDL Statements
+
+#### a. **Create Table**
+```sql
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DepartmentID INT,
+    HireDate DATE
+);
+```
+
+#### b. **Create View**
+```sql
+CREATE VIEW EmployeeDepartment AS
+SELECT e.EmployeeID, e.FirstName, e.LastName, d.DepartmentName
+FROM Employees e
+JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### c. **Create Index**
+```sql
+CREATE INDEX idx_employee_name ON Employees (FirstName, LastName);
+```
+
+#### d. **Create Sequence**
+```sql
+CREATE SEQUENCE emp_seq
+START WITH 1
+INCREMENT BY 1;
+```
+
+#### e. **Create Synonym**
+```sql
+CREATE SYNONYM emp_synonym FOR Employees;
+```
+
+#### f. **Create Constraint (Primary Key, Foreign Key, Unique)**
+```sql
+ALTER TABLE Employees
+ADD CONSTRAINT pk_employee PRIMARY KEY (EmployeeID);
+
+ALTER TABLE Employees
+ADD CONSTRAINT fk_department FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID);
+
+ALTER TABLE Employees
+ADD CONSTRAINT unique_employee_email UNIQUE (Email);
+```
+
+---
+
+### 2. SQL DML Statements
+
+#### a. **Insert Data**
+```sql
+INSERT INTO Employees (EmployeeID, FirstName, LastName, DepartmentID, HireDate)
+VALUES (1, 'John', 'Doe', 101, '2024-01-15');
+
+INSERT INTO Employees (EmployeeID, FirstName, LastName, DepartmentID, HireDate)
+VALUES (2, 'Jane', 'Smith', 102, '2023-05-22');
+```
+
+#### b. **Select Data**
+```sql
+SELECT * FROM Employees;
+
+SELECT FirstName, LastName FROM Employees WHERE DepartmentID = 101;
+```
+
+#### c. **Update Data**
+```sql
+UPDATE Employees
+SET DepartmentID = 103
+WHERE EmployeeID = 1;
+```
+
+#### d. **Delete Data**
+```sql
+DELETE FROM Employees WHERE EmployeeID = 2;
+```
+
+#### e. **Select with Operators**
+```sql
+SELECT * FROM Employees
+WHERE HireDate > '2023-01-01' AND DepartmentID = 101;
+```
+
+#### f. **Using Aggregate Function (COUNT, SUM)**
+```sql
+SELECT DepartmentID, COUNT(*) AS NumberOfEmployees
+FROM Employees
+GROUP BY DepartmentID;
+```
+
+#### g. **Using String Functions (CONCAT)**
+```sql
+SELECT CONCAT(FirstName, ' ', LastName) AS FullName
+FROM Employees;
+```
+
+#### h. **Using Date Functions (DATEDIFF)**
+```sql
+SELECT DATEDIFF(CURDATE(), HireDate) AS DaysSinceHired
+FROM Employees;
+```
+
+#### i. **Using Set Operators (UNION)**
+```sql
+SELECT FirstName, LastName FROM Employees WHERE DepartmentID = 101
+UNION
+SELECT FirstName, LastName FROM Employees WHERE DepartmentID = 102;
+```
+
+#### j. **Using Subquery (In WHERE Clause)**
+```sql
+SELECT FirstName, LastName
+FROM Employees
+WHERE DepartmentID IN (SELECT DepartmentID FROM Departments WHERE DepartmentName = 'Sales');
+```
+
+---
+
+### 3. SQL Queries with Joins, Sub-queries, and Views
+
+#### a. **Inner Join**
+```sql
+SELECT e.FirstName, e.LastName, d.DepartmentName
+FROM Employees e
+INNER JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### b. **Left Join**
+```sql
+SELECT e.FirstName, e.LastName, d.DepartmentName
+FROM Employees e
+LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### c. **Right Join**
+```sql
+SELECT e.FirstName, e.LastName, d.DepartmentName
+FROM Employees e
+RIGHT JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### d. **Full Outer Join**
+```sql
+SELECT e.FirstName, e.LastName, d.DepartmentName
+FROM Employees e
+FULL OUTER JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### e. **Self Join**
+```sql
+SELECT e1.FirstName AS Employee, e2.FirstName AS Manager
+FROM Employees e1
+JOIN Employees e2 ON e1.ManagerID = e2.EmployeeID;
+```
+
+#### f. **Sub-query in SELECT**
+```sql
+SELECT FirstName, LastName,
+    (SELECT DepartmentName FROM Departments WHERE DepartmentID = Employees.DepartmentID) AS Department
+FROM Employees;
+```
+
+#### g. **Sub-query in FROM Clause**
+```sql
+SELECT DepartmentID, COUNT(*) AS NumberOfEmployees
+FROM (SELECT * FROM Employees WHERE HireDate > '2023-01-01') AS RecentEmployees
+GROUP BY DepartmentID;
+```
+
+#### h. **Sub-query in WHERE Clause (Correlated Sub-query)**
+```sql
+SELECT FirstName, LastName
+FROM Employees e
+WHERE e.DepartmentID = (SELECT DepartmentID FROM Departments WHERE DepartmentName = 'HR');
+```
+
+#### i. **View with Joins**
+```sql
+CREATE VIEW EmployeeDetails AS
+SELECT e.EmployeeID, e.FirstName, e.LastName, e.HireDate, d.DepartmentName
+FROM Employees e
+INNER JOIN Departments d ON e.DepartmentID = d.DepartmentID;
+```
+
+#### j. **Sub-query with IN**
+```sql
+SELECT FirstName, LastName
+FROM Employees
+WHERE DepartmentID IN (SELECT DepartmentID FROM Departments WHERE DepartmentName = 'IT');
+```
+
+These queries demonstrate a variety of SQL operations using DDL, DML, joins, sub-queries, and views.
+
+
+
+
+
+
+
+### SQL DDL, DML, Joins, Sub-queries, and Views - Theory
+
+#### 1. **SQL DDL (Data Definition Language)**
+
+SQL DDL commands are used to define the structure of a database. They are responsible for creating, modifying, and removing database objects like tables, views, indexes, sequences, and synonyms. Below are the main DDL commands:
+
+- **CREATE TABLE**: This command creates a new table within the database. A table is a collection of rows and columns used to store data.
+    - Example: `CREATE TABLE Employees (EmployeeID INT PRIMARY KEY, FirstName VARCHAR(50), LastName VARCHAR(50), DepartmentID INT, HireDate DATE);`
+
+- **CREATE VIEW**: A view is a virtual table that is based on the result of a SELECT query. It does not store data itself but shows data from one or more tables.
+    - Example: `CREATE VIEW EmployeeDepartment AS SELECT e.EmployeeID, e.FirstName, e.LastName, d.DepartmentName FROM Employees e JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **CREATE INDEX**: An index is used to speed up query processing. It improves the speed of retrieval operations on a database table.
+    - Example: `CREATE INDEX idx_employee_name ON Employees (FirstName, LastName);`
+
+- **CREATE SEQUENCE**: A sequence is used to generate a unique numeric value, often for creating unique primary keys.
+    - Example: `CREATE SEQUENCE emp_seq START WITH 1 INCREMENT BY 1;`
+
+- **CREATE SYNONYM**: A synonym is an alias for a database object such as a table, view, or sequence. It helps simplify SQL queries.
+    - Example: `CREATE SYNONYM emp_synonym FOR Employees;`
+
+- **ALTER TABLE**: This command modifies the structure of an existing table, like adding constraints or columns.
+    - Example: `ALTER TABLE Employees ADD CONSTRAINT pk_employee PRIMARY KEY (EmployeeID);`
+
+#### 2. **SQL DML (Data Manipulation Language)**
+
+SQL DML commands are used to manipulate data stored in the database. The main DML commands include:
+
+- **INSERT INTO**: This command is used to add new rows of data into a table.
+    - Example: `INSERT INTO Employees (EmployeeID, FirstName, LastName, DepartmentID, HireDate) VALUES (1, 'John', 'Doe', 101, '2024-01-15');`
+
+- **SELECT**: This command retrieves data from one or more tables. It is the most commonly used DML command.
+    - Example: `SELECT * FROM Employees;`
+
+- **UPDATE**: This command modifies existing data in a table.
+    - Example: `UPDATE Employees SET DepartmentID = 103 WHERE EmployeeID = 1;`
+
+- **DELETE**: This command removes data from a table.
+    - Example: `DELETE FROM Employees WHERE EmployeeID = 2;`
+
+- **WHERE**: A condition that filters rows based on specified criteria.
+    - Example: `SELECT * FROM Employees WHERE DepartmentID = 101;`
+
+- **AGGREGATE FUNCTIONS**: SQL supports aggregate functions like `COUNT()`, `SUM()`, `AVG()`, `MAX()`, and `MIN()` to perform calculations on data.
+    - Example: `SELECT DepartmentID, COUNT(*) AS NumberOfEmployees FROM Employees GROUP BY DepartmentID;`
+
+- **SET OPERATORS**: These operators allow combining the results of multiple queries. The main set operators are `UNION`, `INTERSECT`, and `EXCEPT`.
+    - Example: `SELECT FirstName, LastName FROM Employees WHERE DepartmentID = 101 UNION SELECT FirstName, LastName FROM Employees WHERE DepartmentID = 102;`
+
+#### 3. **SQL Joins**
+
+Joins are used to combine rows from two or more tables based on a related column. There are different types of joins:
+
+- **INNER JOIN**: Returns rows when there is a match in both tables. If no match exists, the row is not included in the result.
+    - Example: `SELECT e.FirstName, e.LastName, d.DepartmentName FROM Employees e INNER JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **LEFT JOIN (or LEFT OUTER JOIN)**: Returns all rows from the left table and matched rows from the right table. If there is no match, `NULL` values are returned for the right table’s columns.
+    - Example: `SELECT e.FirstName, e.LastName, d.DepartmentName FROM Employees e LEFT JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **RIGHT JOIN (or RIGHT OUTER JOIN)**: Similar to LEFT JOIN, but returns all rows from the right table and matched rows from the left table.
+    - Example: `SELECT e.FirstName, e.LastName, d.DepartmentName FROM Employees e RIGHT JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **FULL OUTER JOIN**: Returns rows when there is a match in either left or right table. If there is no match, `NULL` values are returned for the missing side.
+    - Example: `SELECT e.FirstName, e.LastName, d.DepartmentName FROM Employees e FULL OUTER JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **SELF JOIN**: A self join is a join of a table with itself, often used to compare rows within the same table.
+    - Example: `SELECT e1.FirstName AS Employee, e2.FirstName AS Manager FROM Employees e1 JOIN Employees e2 ON e1.ManagerID = e2.EmployeeID;`
+
+#### 4. **SQL Sub-queries**
+
+A sub-query is a query within another query. It can be used in `SELECT`, `INSERT`, `UPDATE`, or `DELETE` statements.
+
+- **Sub-query in WHERE clause**: Used to filter the result set based on the results of another query.
+    - Example: `SELECT FirstName, LastName FROM Employees WHERE DepartmentID = (SELECT DepartmentID FROM Departments WHERE DepartmentName = 'HR');`
+
+- **Correlated Sub-query**: A correlated sub-query depends on the outer query for its values.
+    - Example: `SELECT FirstName, LastName FROM Employees e WHERE e.DepartmentID = (SELECT DepartmentID FROM Departments d WHERE d.DepartmentName = 'Sales');`
+
+- **Sub-query in FROM clause**: The sub-query is treated like a table or view.
+    - Example: `SELECT DepartmentID, COUNT(*) AS NumberOfEmployees FROM (SELECT * FROM Employees WHERE HireDate > '2023-01-01') AS RecentEmployees GROUP BY DepartmentID;`
+
+#### 5. **SQL Views**
+
+A view is a virtual table in SQL, which is defined by a `SELECT` query. Views can be used to simplify complex queries, improve security, and present data in a more user-friendly format.
+
+- **Creating a View**: A view is created using the `CREATE VIEW` statement and can involve complex joins, filters, and calculations.
+    - Example: `CREATE VIEW EmployeeDetails AS SELECT e.EmployeeID, e.FirstName, e.LastName, e.HireDate, d.DepartmentName FROM Employees e JOIN Departments d ON e.DepartmentID = d.DepartmentID;`
+
+- **Using Views**: Once created, views can be queried just like regular tables.
+    - Example: `SELECT * FROM EmployeeDetails;`
+
+#### Conclusion
+
+SQL provides a powerful set of commands for interacting with relational databases. DDL commands define the structure, DML commands handle the data, and joins, sub-queries, and views help in querying and presenting data in an optimized way. Understanding these concepts is essential for managing and querying data effectively in any relational database system.

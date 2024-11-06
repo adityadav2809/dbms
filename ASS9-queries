@@ -1,0 +1,216 @@
+> db.createCollection("student");
+{ "ok" : 1 }
+> db.student.insertMany([
+...   { "roll_no": 1, "name": "Amit", "addr": "Loni" },
+...   { "roll_no": 2, "name": "Shashir", "addr": { "At": "Loni", "Tal": "Rahata" } },
+...   { "roll_no": 3, "name": "Sachin", "addr": "Kolhar" },
+...   { "roll_no": 4, "name": "Rahul", "addr": "Pune" }
+... ]);
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("672a963392da7b1abb74af9e"),
+		ObjectId("672a963392da7b1abb74af9f"),
+		ObjectId("672a963392da7b1abb74afa0"),
+		ObjectId("672a963392da7b1abb74afa1")
+	]
+}
+> db.student.insertMany([
+...   { "roll_no": 5, "name": "Vikram", "addr": "Nashik" },
+...   { "roll_no": 6, "name": "Anjali", "addr": "Mumbai" },
+...   { "roll_no": 7, "name": "Priya", "addr": "Aurangabad" }
+... ]);
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("672a963892da7b1abb74afa2"),
+		ObjectId("672a963892da7b1abb74afa3"),
+		ObjectId("672a963892da7b1abb74afa4")
+	]
+}
+> 
+> db.student.find();
+{ "_id" : ObjectId("672a963392da7b1abb74af9e"), "roll_no" : 1, "name" : "Amit", "addr" : "Loni" }
+{ "_id" : ObjectId("672a963392da7b1abb74af9f"), "roll_no" : 2, "name" : "Shashir", "addr" : { "At" : "Loni", "Tal" : "Rahata" } }
+{ "_id" : ObjectId("672a963392da7b1abb74afa0"), "roll_no" : 3, "name" : "Sachin", "addr" : "Kolhar" }
+{ "_id" : ObjectId("672a963392da7b1abb74afa1"), "roll_no" : 4, "name" : "Rahul", "addr" : "Pune" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa2"), "roll_no" : 5, "name" : "Vikram", "addr" : "Nashik" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa3"), "roll_no" : 6, "name" : "Anjali", "addr" : "Mumbai" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa4"), "roll_no" : 7, "name" : "Priya", "addr" : "Aurangabad" }
+> 
+> 
+> 
+> db.student.find({}, { "name": 1, "_id": 0 });
+{ "name" : "Amit" }
+{ "name" : "Shashir" }
+{ "name" : "Sachin" }
+{ "name" : "Rahul" }
+{ "name" : "Vikram" }
+{ "name" : "Anjali" }
+{ "name" : "Priya" }
+> 
+> 
+> 
+> db.student.find().limit(5);
+{ "_id" : ObjectId("672a963392da7b1abb74af9e"), "roll_no" : 1, "name" : "Amit", "addr" : "Loni" }
+{ "_id" : ObjectId("672a963392da7b1abb74af9f"), "roll_no" : 2, "name" : "Shashir", "addr" : { "At" : "Loni", "Tal" : "Rahata" } }
+{ "_id" : ObjectId("672a963392da7b1abb74afa0"), "roll_no" : 3, "name" : "Sachin", "addr" : "Kolhar" }
+{ "_id" : ObjectId("672a963392da7b1abb74afa1"), "roll_no" : 4, "name" : "Rahul", "addr" : "Pune" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa2"), "roll_no" : 5, "name" : "Vikram", "addr" : "Nashik" }
+> 
+> 
+> 
+> db.student.find().skip(5);
+{ "_id" : ObjectId("672a963892da7b1abb74afa3"), "roll_no" : 6, "name" : "Anjali", "addr" : "Mumbai" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa4"), "roll_no" : 7, "name" : "Priya", "addr" : "Aurangabad" }
+> 
+> 
+> db.student.find({ "roll_no": { "$gte": 5, "$lte": 10 } });
+{ "_id" : ObjectId("672a963892da7b1abb74afa2"), "roll_no" : 5, "name" : "Vikram", "addr" : "Nashik" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa3"), "roll_no" : 6, "name" : "Anjali", "addr" : "Mumbai" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa4"), "roll_no" : 7, "name" : "Priya", "addr" : "Aurangabad" }
+> 
+> 
+> db.student.find({ "$or": [{ "addr": "Loni" }, { "addr": "Pune" }] });
+{ "_id" : ObjectId("672a963392da7b1abb74af9e"), "roll_no" : 1, "name" : "Amit", "addr" : "Loni" }
+{ "_id" : ObjectId("672a963392da7b1abb74afa1"), "roll_no" : 4, "name" : "Rahul", "addr" : "Pune" }
+> 
+> 
+> db.student.find().sort({ "roll_no": 1 });
+{ "_id" : ObjectId("672a963392da7b1abb74af9e"), "roll_no" : 1, "name" : "Amit", "addr" : "Loni" }
+{ "_id" : ObjectId("672a963392da7b1abb74af9f"), "roll_no" : 2, "name" : "Shashir", "addr" : { "At" : "Loni", "Tal" : "Rahata" } }
+{ "_id" : ObjectId("672a963392da7b1abb74afa0"), "roll_no" : 3, "name" : "Sachin", "addr" : "Kolhar" }
+{ "_id" : ObjectId("672a963392da7b1abb74afa1"), "roll_no" : 4, "name" : "Rahul", "addr" : "Pune" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa2"), "roll_no" : 5, "name" : "Vikram", "addr" : "Nashik" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa3"), "roll_no" : 6, "name" : "Anjali", "addr" : "Mumbai" }
+{ "_id" : ObjectId("672a963892da7b1abb74afa4"), "roll_no" : 7, "name" : "Priya", "addr" : "Aurangabad" }
+> 
+> 
+> db.student.deleteMany({ "roll_no": { "$lt": 8, "$gt": 3 } });
+{ "acknowledged" : true, "deletedCount" : 4 }
+> 
+> 
+> db.student.deleteMany({ "addr": "Loni" });
+{ "acknowledged" : true, "deletedCount" : 1 }
+> 
+> 
+> db.student.updateOne(
+...   { "roll_no": 10 },
+...   { "$set": { "name": "Ram", "addr": "Pune", "roll_no": 60 } },
+...   { "upsert": true }
+... );
+{
+	"acknowledged" : true,
+	"matchedCount" : 0,
+	"modifiedCount" : 0,
+	"upsertedId" : ObjectId("672a96879f5c2c6fc3adc79e")
+}
+> 
+> 
+> db.student.updateOne(
+...   { "roll_no": 1 },
+...   { "$set": { "addr": { "At": "Sangamner", "Tal": "Sangamner", "Dist": "Ahemadnagar" } } }
+... );
+{ "acknowledged" : true, "matchedCount" : 0, "modifiedCount" : 0 }
+> 
+> 
+> db.student.createIndex({ "roll_no": 1 });
+{
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"createdCollectionAutomatically" : false,
+	"ok" : 1
+}
+> 
+> 
+> 
+> db.student.drop();
+true
+> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Create a new collection
+db.createCollection("student");
+
+// Insert multiple documents into the student collection
+db.student.insertMany([
+   { "roll_no": 1, "name": "Amit", "addr": "Loni" },
+   { "roll_no": 2, "name": "Shashir", "addr": { "At": "Loni", "Tal": "Rahata" } },
+   { "roll_no": 3, "name": "Sachin", "addr": "Kolhar" },
+   { "roll_no": 4, "name": "Rahul", "addr": "Pune" },
+   { "roll_no": 5, "name": "Vikram", "addr": "Nashik" },
+   { "roll_no": 6, "name": "Anjali", "addr": "Mumbai" },
+   { "roll_no": 7, "name": "Priya", "addr": "Aurangabad" }
+]);
+
+// Find all documents in the student collection
+db.student.find();
+
+// Find only the names of the students
+db.student.find({}, { "name": 1, "_id": 0 });
+
+// Find the first 5 documents
+db.student.find().limit(5);
+
+// Skip the first 5 documents
+db.student.find().skip(5);
+
+// Find students with roll_no between 5 and 10
+db.student.find({ "roll_no": { "$gte": 5, "$lte": 10 } });
+
+// Find students who live in Loni or Pune
+db.student.find({ "$or": [{ "addr": "Loni" }, { "addr": "Pune" }] });
+
+// Sort students by roll_no in ascending order
+db.student.find().sort({ "roll_no": 1 });
+
+// Delete students with roll_no between 4 and 8
+db.student.deleteMany({ "roll_no": { "$lt": 8, "$gt": 3 } });
+
+// Delete students living in Loni
+db.student.deleteMany({ "addr": "Loni" });
+
+// Update or insert a student with roll_no 10
+db.student.updateOne(
+   { "roll_no": 10 },
+   { "$set": { "name": "Ram", "addr": "Pune", "roll_no": 60 } },
+   { "upsert": true }
+);
+
+// Update the address of the student with roll_no 1
+db.student.updateOne(
+   { "roll_no": 1 },
+   { "$set": { "addr": { "At": "Sangamner", "Tal": "Sangamner", "Dist": "Ahemadnagar" } } }
+);
+
+// Create an index on roll_no
+db.student.createIndex({ "roll_no": 1 });
+
+// Drop the student collection
+db.student.drop();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

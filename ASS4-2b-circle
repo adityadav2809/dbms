@@ -1,0 +1,161 @@
+-- Step 1: Create the areas table if it doesn't exist
+CREATE TABLE IF NOT EXISTS areas (
+    radius INT,
+    area DECIMAL(10, 2)
+);
+
+-- Step 2: Set the delimiter
+DELIMITER //
+
+-- Step 3: Create the stored procedure
+CREATE PROCEDURE CalculateCircleAreas()
+BEGIN
+    DECLARE v_radius INT DEFAULT 5;
+    DECLARE v_area DECIMAL(10, 2);
+
+    loop_label: LOOP
+        SET v_area = 3.14159 * v_radius * v_radius;
+        INSERT INTO areas (radius, area) VALUES (v_radius, v_area);
+        SET v_radius = v_radius + 1;
+
+        IF v_radius > 9 THEN
+            LEAVE loop_label;
+        END IF;
+    END LOOP loop_label;
+
+    COMMIT;
+END //
+
+-- Step 4: Reset the delimiter
+DELIMITER ;
+
+-- Step 5: Call the procedure
+CALL CalculateCircleAreas();
+
+-- Step 6: Select all records from the areas table
+SELECT * FROM areas;
+
+
+
+
+
+
+
+
+
+Sure! Let's go through this code step by step, and I'll explain every part in great detail, especially focusing on the SQL and procedural code (PL/SQL).
+
+### **Step 1: Create the `areas` table if it doesn't exist**
+
+```sql
+CREATE TABLE IF NOT EXISTS areas (
+    radius INT,
+    area DECIMAL(10, 2)
+);
+```
+- **`CREATE TABLE IF NOT EXISTS`**: This statement checks if the table named `areas` already exists in the database. If it doesn't, it will create it; if it does exist, no changes will be made. This is useful for ensuring that you don't accidentally recreate the table every time you run the script.
+  
+- **Table columns**:
+  - **`radius INT`**: This column stores the radius of the circle, which is an integer value.
+  - **`area DECIMAL(10, 2)`**: This column stores the area of the circle. It is a decimal value with a total of 10 digits, where 2 digits are reserved for the decimal places (precision: 10 digits, scale: 2 digits). The area of the circle will be calculated with a floating-point value to ensure precision.
+
+### **Step 2: Set the delimiter**
+
+```sql
+DELIMITER //
+```
+- **`DELIMITER //`**: The default delimiter in MySQL for statements is a semicolon (`;`), but since stored procedures contain multiple SQL statements, using a semicolon within the procedure would cause issues. Therefore, we change the delimiter to `//` temporarily to allow multiple SQL statements inside the stored procedure. After we finish creating the stored procedure, we will reset the delimiter back to `;`.
+
+### **Step 3: Create the stored procedure (`CalculateCircleAreas`)**
+
+```sql
+CREATE PROCEDURE CalculateCircleAreas()
+BEGIN
+    DECLARE v_radius INT DEFAULT 5;
+    DECLARE v_area DECIMAL(10, 2);
+```
+- **`CREATE PROCEDURE`**: This keyword defines the start of a stored procedure. A stored procedure is a set of SQL statements that can be executed by calling the procedure name. In this case, the procedure is named `CalculateCircleAreas`.
+  
+- **`DECLARE`**: Inside the stored procedure, we declare local variables that will be used during the procedure's execution:
+  - **`v_radius INT DEFAULT 5`**: A local variable `v_radius` of type `INT` (integer) is declared. It is initialized with the value `5`, which represents the starting radius for the circle calculation.
+  - **`v_area DECIMAL(10, 2)`**: A local variable `v_area` is declared to store the calculated area of the circle. It is of type `DECIMAL(10, 2)` to handle the precision of the floating-point value for the area.
+
+#### Looping through radius values (5 to 9)
+```sql
+    loop_label: LOOP
+        SET v_area = 3.14159 * v_radius * v_radius;
+        INSERT INTO areas (radius, area) VALUES (v_radius, v_area);
+        SET v_radius = v_radius + 1;
+```
+- **`loop_label: LOOP`**: This defines a labeled loop. The label `loop_label` is just a name to identify the loop. It helps to break or exit the loop in a controlled manner using `LEAVE`.
+  
+- **Inside the loop**:
+  1. **`SET v_area = 3.14159 * v_radius * v_radius`**: This statement calculates the area of a circle using the formula `π * r²`, where `r` is the radius. In this case, `3.14159` is used as an approximation of `π`. The result is stored in the variable `v_area`.
+  2. **`INSERT INTO areas (radius, area) VALUES (v_radius, v_area)`**: This statement inserts the current value of `v_radius` and the calculated `v_area` into the `areas` table.
+  3. **`SET v_radius = v_radius + 1`**: After inserting the current radius and area, the radius is incremented by 1 to calculate the next circle's area in the next loop iteration.
+
+#### Exiting the loop when `v_radius > 9`
+```sql
+        IF v_radius > 9 THEN
+            LEAVE loop_label;
+        END IF;
+    END LOOP loop_label;
+```
+- **`IF v_radius > 9 THEN`**: This checks if the radius has exceeded `9`. The loop should continue as long as the radius is less than or equal to `9`.
+- **`LEAVE loop_label;`**: This statement exits the loop when the radius exceeds `9`. The label `loop_label` helps to ensure that the correct loop is exited.
+- **`END IF;`**: Closes the `IF` statement.
+- **`END LOOP loop_label;`**: Marks the end of the loop. The loop will continue to run as long as `v_radius` is less than or equal to 9.
+
+#### Committing the changes
+```sql
+    COMMIT;
+END //
+```
+- **`COMMIT;`**: This statement commits the changes made in the transaction. This ensures that all the `INSERT` statements within the loop are saved to the database permanently.
+- **`END //`**: This marks the end of the stored procedure.
+
+### **Step 4: Reset the delimiter**
+
+```sql
+DELIMITER ;
+```
+- **`DELIMITER ;`**: After the stored procedure is created, the delimiter is reset back to the default semicolon (`;`), which allows regular SQL statements to be executed.
+
+### **Step 5: Call the procedure**
+
+```sql
+CALL CalculateCircleAreas();
+```
+- **`CALL CalculateCircleAreas();`**: This statement calls the stored procedure `CalculateCircleAreas`. When called, it will calculate the area of circles with radii starting from 5 and ending at 9, inserting each radius and corresponding area into the `areas` table.
+
+### **Step 6: Select all records from the `areas` table**
+
+```sql
+SELECT * FROM areas;
+```
+- **`SELECT * FROM areas;`**: This query retrieves all the records from the `areas` table. Since the stored procedure inserts the calculated areas of circles into this table, running this query will display the radii and their corresponding areas (for radii 5 to 9).
+
+### **Explanation of Output:**
+After executing the procedure and querying the table, the following records will be inserted into the `areas` table:
+
+| radius | area     |
+|--------|----------|
+| 5      | 78.54    |
+| 6      | 113.10   |
+| 7      | 153.94   |
+| 8      | 201.06   |
+| 9      | 254.47   |
+
+These values are derived from the formula `π * r²`, where:
+- **For radius = 5**: Area = π * 5² = 3.14159 * 25 ≈ 78.54
+- **For radius = 6**: Area = π * 6² = 3.14159 * 36 ≈ 113.10
+- **For radius = 7**: Area = π * 7² = 3.14159 * 49 ≈ 153.94
+- **For radius = 8**: Area = π * 8² = 3.14159 * 64 ≈ 201.06
+- **For radius = 9**: Area = π * 9² = 3.14159 * 81 ≈ 254.47
+
+### Summary:
+
+- The code creates a table to store circle radii and their areas.
+- A stored procedure (`CalculateCircleAreas`) is used to calculate areas for circles with radii from 5 to 9, and insert the results into the table.
+- The stored procedure uses a loop to calculate the area and increment the radius, and it stops when the radius exceeds 9.
+- Finally, the areas of the circles are displayed by querying the `areas` table.

@@ -1,0 +1,404 @@
+-- Create Borrower Table
+CREATE TABLE Borrower (
+    Rollno INT(4),
+    Name VARCHAR(20),
+    DateofIssue DATE,
+    NameofBook VARCHAR(30),
+    Status VARCHAR(10)
+);
+
+-- Insert Data into Borrower Table
+INSERT INTO Borrower VALUES (14, 'Ram', '2022-09-19', 'Operating System', 'I');
+INSERT INTO Borrower VALUES (27, 'Soham', '2022-07-24', 'Object Oriented Programming', 'I');
+INSERT INTO Borrower VALUES (34, 'Mohan', '2022-06-12', 'Microprocessor', 'I');
+INSERT INTO Borrower VALUES (48, 'Om', '2022-04-19', 'Mechanics', 'I');
+
+-- Select All from Borrower
+SELECT * FROM Borrower;
+
+-- Create Fine Table
+CREATE TABLE Fine (
+    Rollno INT(4),
+    Date DATE,
+    Amount INT(10)
+);
+
+-- Create Procedure to Calculate Fine
+DELIMITER //
+CREATE PROCEDURE calc_Fine(IN r INT, IN b VARCHAR(30))
+BEGIN
+    DECLARE doi DATE;
+    DECLARE diff INT;
+
+    -- Fetch the Date of Issue for the specified Rollno and Book Name
+    SELECT DateofIssue INTO doi 
+    FROM Borrower 
+    WHERE Rollno = r AND NameofBook = b;
+
+    -- Calculate the difference in days
+    SET diff = DATEDIFF(CURDATE(), doi);
+
+    -- Calculate fines based on the number of days
+    IF diff >= 15 AND diff <= 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), diff * 5);
+    ELSEIF diff > 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), (30 * 5) + ((diff - 30) * 50));
+    END IF;
+END //
+DELIMITER ;
+
+-- Call Procedure to Calculate Fine for Each Borrower
+CALL calc_Fine(14, 'Operating System');
+CALL calc_Fine(27, 'Object Oriented Programming');
+CALL calc_Fine(34, 'Microprocessor');
+CALL calc_Fine(48, 'Mechanics');
+
+-- Select All from Fine after calculating fines
+SELECT * FROM Fine;
+
+-- Create Procedure to Submit Book
+DELIMITER //
+CREATE PROCEDURE submit(IN r INT)
+BEGIN
+    -- Update the Borrower's status to 'R' (Returned)
+    UPDATE Borrower SET Status = 'R' WHERE Rollno = r;
+
+    -- Delete any fines associated with the borrower
+    DELETE FROM Fine WHERE Rollno = r;
+END //
+DELIMITER ;
+
+-- Call Procedure to Submit Books for Each Borrower
+CALL submit(14);
+CALL submit(27);
+CALL submit(48);
+CALL submit(34);
+
+-- Select All from Fine (After submission)
+SELECT * FROM Fine;
+
+-- Select All from Borrower (After submission)
+SELECT * FROM Borrower;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This code demonstrates the creation of two tables (`Borrower` and `Fine`), procedures for calculating fines and updating borrower status, and the corresponding SQL operations to manage the borrowing and returning of books. Let's break down each part:
+
+### 1. **Creating the `Borrower` Table:**
+```sql
+CREATE TABLE Borrower (
+    Rollno INT(4),
+    Name VARCHAR(20),
+    DateofIssue DATE,
+    NameofBook VARCHAR(30),
+    Status VARCHAR(10)
+);
+```
+- **`Rollno`**: The roll number of the student who borrowed the book (integer).
+- **`Name`**: The name of the borrower (string of up to 20 characters).
+- **`DateofIssue`**: The date the book was issued (date format).
+- **`NameofBook`**: The name of the book borrowed (string of up to 30 characters).
+- **`Status`**: The status of the borrowed book (e.g., 'I' for issued, 'R' for returned).
+
+### 2. **Inserting Data into the `Borrower` Table:**
+```sql
+INSERT INTO Borrower VALUES (14, 'Ram', '2022-09-19', 'Operating System', 'I');
+INSERT INTO Borrower VALUES (27, 'Soham', '2022-07-24', 'Object Oriented Programming', 'I');
+INSERT INTO Borrower VALUES (34, 'Mohan', '2022-06-12', 'Microprocessor', 'I');
+INSERT INTO Borrower VALUES (48, 'Om', '2022-04-19', 'Mechanics', 'I');
+```
+This part inserts 4 records into the `Borrower` table. Each record represents a student who has borrowed a book, with the status 'I' (Issued).
+
+### 3. **Selecting All Records from `Borrower`:**
+```sql
+SELECT * FROM Borrower;
+```
+This query selects all rows from the `Borrower` table. The output would be:
+| Rollno | Name  | DateofIssue | NameofBook             | Status |
+|--------|-------|-------------|------------------------|--------|
+| 14     | Ram   | 2022-09-19  | Operating System       | I      |
+| 27     | Soham | 2022-07-24  | Object Oriented Programming | I      |
+| 34     | Mohan | 2022-06-12  | Microprocessor         | I      |
+| 48     | Om    | 2022-04-19  | Mechanics              | I      |
+
+### 4. **Creating the `Fine` Table:**
+```sql
+CREATE TABLE Fine (
+    Rollno INT(4),
+    Date DATE,
+    Amount INT(10)
+);
+```
+The `Fine` table stores the fines for borrowers. It has:
+- **`Rollno`**: The roll number of the borrower.
+- **`Date`**: The date the fine is imposed.
+- **`Amount`**: The amount of the fine.
+
+### 5. **Creating the Procedure to Calculate Fine:**
+```sql
+DELIMITER //
+CREATE PROCEDURE calc_Fine(IN r INT, IN b VARCHAR(30))
+BEGIN
+    DECLARE doi DATE;
+    DECLARE diff INT;
+
+    -- Fetch the Date of Issue for the specified Rollno and Book Name
+    SELECT DateofIssue INTO doi 
+    FROM Borrower 
+    WHERE Rollno = r AND NameofBook = b;
+
+    -- Calculate the difference in days
+    SET diff = DATEDIFF(CURDATE(), doi);
+
+    -- Calculate fines based on the number of days
+    IF diff >= 15 AND diff <= 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), diff * 5);
+    ELSEIF diff > 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), (30 * 5) + ((diff - 30) * 50));
+    END IF;
+END //
+DELIMITER ;
+```
+- The procedure `calc_Fine` takes two parameters: `r` (roll number) and `b` (book name).
+- It calculates the difference (`diff`) between the current date and the `DateofIssue` for the given roll number and book name.
+- If the borrower has kept the book for 15-30 days, the fine is calculated at `5` per day. If the book is overdue by more than 30 days, the fine is calculated as `30 days * 5` plus an additional `50` for every day beyond 30 days.
+
+### 6. **Calling the Procedure to Calculate Fines:**
+```sql
+CALL calc_Fine(14, 'Operating System');
+CALL calc_Fine(27, 'Object Oriented Programming');
+CALL calc_Fine(34, 'Microprocessor');
+CALL calc_Fine(48, 'Mechanics');
+```
+These procedure calls calculate the fines for the 4 borrowers based on how long they have kept the books.
+
+### 7. **Selecting All Records from `Fine`:**
+```sql
+SELECT * FROM Fine;
+```
+After the procedure calls, this query selects all rows from the `Fine` table. Let's assume the current date is `2024-11-06`. The fine calculation would look like this:
+
+- **Ram**: Borrowed on `2022-09-19`. The difference from `2024-11-06` is around 770 days. Fine calculation: `30 days * 5` + `(770 - 30) * 50 = 150 + 37000 = 37150`.
+- **Soham**: Borrowed on `2022-07-24`. The difference from `2024-11-06` is around 820 days. Fine calculation: `30 days * 5` + `(820 - 30) * 50 = 150 + 39500 = 39650`.
+- **Mohan**: Borrowed on `2022-06-12`. The difference from `2024-11-06` is around 880 days. Fine calculation: `30 days * 5` + `(880 - 30) * 50 = 150 + 42500 = 42650`.
+- **Om**: Borrowed on `2022-04-19`. The difference from `2024-11-06` is around 950 days. Fine calculation: `30 days * 5` + `(950 - 30) * 50 = 150 + 46000 = 46150`.
+
+The resulting data in the `Fine` table will look like:
+| Rollno | Date       | Amount |
+|--------|------------|--------|
+| 14     | 2024-11-06 | 37150  |
+| 27     | 2024-11-06 | 39650  |
+| 34     | 2024-11-06 | 42650  |
+| 48     | 2024-11-06 | 46150  |
+
+### 8. **Creating the Procedure to Submit a Book:**
+```sql
+DELIMITER //
+CREATE PROCEDURE submit(IN r INT)
+BEGIN
+    -- Update the Borrower's status to 'R' (Returned)
+    UPDATE Borrower SET Status = 'R' WHERE Rollno = r;
+
+    -- Delete any fines associated with the borrower
+    DELETE FROM Fine WHERE Rollno = r;
+END //
+DELIMITER ;
+```
+The `submit` procedure:
+- Marks the borrowed book as returned (`Status = 'R'`).
+- Deletes any fines associated with that borrower from the `Fine` table.
+
+### 9. **Calling the Procedure to Submit Books:**
+```sql
+CALL submit(14);
+CALL submit(27);
+CALL submit(48);
+CALL submit(34);
+```
+These calls mark the books for the given roll numbers as returned and remove their associated fines.
+
+### 10. **Selecting All Records from `Fine` (After Submission):**
+```sql
+SELECT * FROM Fine;
+```
+After submitting the books, the `Fine` table will be empty because the fines for all borrowers have been deleted during the `submit` procedure.
+
+### 11. **Selecting All Records from `Borrower` (After Submission):**
+```sql
+SELECT * FROM Borrower;
+```
+The `Borrower` table will show the updated statuses of the borrowers:
+| Rollno | Name  | DateofIssue | NameofBook             | Status |
+|--------|-------|-------------|------------------------|--------|
+| 14     | Ram   | 2022-09-19  | Operating System       | R      |
+| 27     | Soham | 2022-07-24  | Object Oriented Programming | R      |
+| 34     | Mohan | 2022-06-12  | Microprocessor         | R      |
+| 48     | Om    | 2022-04-19  | Mechanics              | R      |
+
+### Final Output:
+- All borrowed books are marked as returned (`Status = 'R'`).
+- The `Fine` table is empty because the fines were deleted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sure! Let's dive deeper into the PL/SQL parts of the code, which involve the creation of stored procedures to calculate fines and submit books. These are the core components that manipulate data in your database.
+
+### 1. **Creating a Stored Procedure for Fine Calculation (`calc_Fine`)**
+
+#### **Procedure Definition**:
+```sql
+DELIMITER //
+CREATE PROCEDURE calc_Fine(IN r INT, IN b VARCHAR(30))
+BEGIN
+    DECLARE doi DATE;
+    DECLARE diff INT;
+```
+- **DELIMITER //**: This changes the statement delimiter from the default semicolon (`;`) to double slashes (`//`) to allow the creation of stored procedures that may contain semicolons inside them.
+  
+- **CREATE PROCEDURE**: This statement creates a stored procedure. In this case, the procedure is named `calc_Fine`, which calculates fines based on the days a book is overdue.
+
+- **IN r INT**: The first parameter is `r` (of type `INT`), which represents the roll number of the student for whom the fine will be calculated.
+  
+- **IN b VARCHAR(30)**: The second parameter is `b` (of type `VARCHAR(30)`), which represents the name of the book for which the fine will be calculated.
+
+#### **Variable Declarations**:
+```sql
+    DECLARE doi DATE;
+    DECLARE diff INT;
+```
+- **`doi DATE`**: A variable `doi` (Date of Issue) is declared to hold the date when the book was issued.
+  
+- **`diff INT`**: A variable `diff` is declared to hold the difference in days between the current date and the `DateofIssue` of the book.
+
+#### **Fetching Date of Issue for the Borrowed Book**:
+```sql
+    SELECT DateofIssue INTO doi 
+    FROM Borrower 
+    WHERE Rollno = r AND NameofBook = b;
+```
+- This query fetches the `DateofIssue` of the book based on the provided `Rollno` (student roll number) and `NameofBook` (name of the book) from the `Borrower` table.
+- The result is stored in the `doi` variable. If there is no matching record for the given `Rollno` and `NameofBook`, the `doi` variable will remain `NULL`.
+
+#### **Calculating the Difference in Days**:
+```sql
+    SET diff = DATEDIFF(CURDATE(), doi);
+```
+- **`CURDATE()`**: This function returns the current date.
+- **`DATEDIFF(CURDATE(), doi)`**: This function calculates the difference between the current date (`CURDATE()`) and the `DateofIssue` (`doi`) in terms of days. The result is stored in the `diff` variable.
+
+#### **Calculating the Fine**:
+The next block checks how many days the book is overdue and calculates the fine based on this.
+
+```sql
+    IF diff >= 15 AND diff <= 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), diff * 5);
+```
+- **`IF diff >= 15 AND diff <= 30`**: If the book has been overdue for between 15 and 30 days, the fine is calculated at `5` per day.
+- **`INSERT INTO Fine VALUES (r, CURDATE(), diff * 5)`**: The calculated fine (`diff * 5`) is inserted into the `Fine` table. The `Rollno` (`r`) and the current date (`CURDATE()`) are also stored along with the fine amount.
+
+```sql
+    ELSEIF diff > 30 THEN
+        INSERT INTO Fine VALUES (r, CURDATE(), (30 * 5) + ((diff - 30) * 50));
+    END IF;
+```
+- **`ELSEIF diff > 30`**: If the book has been overdue for more than 30 days, the fine calculation changes:
+  - For the first 30 days, the fine is `5` per day.
+  - For each additional day beyond 30, the fine is increased to `50` per day.
+  
+- **`(30 * 5) + ((diff - 30) * 50)`**: This formula calculates the fine as `150` for the first 30 days (`30 * 5`), plus `50` for every day after 30 days (`(diff - 30) * 50`).
+- **`INSERT INTO Fine`**: The final fine is inserted into the `Fine` table, along with the `Rollno` (`r`) and the current date (`CURDATE()`).
+
+#### **End of Procedure**:
+```sql
+END //
+DELIMITER ;
+```
+- **END //**: This marks the end of the procedure.
+- **DELIMITER ;**: This resets the delimiter back to the default semicolon (`;`).
+
+### 2. **Calling the `calc_Fine` Procedure**
+
+```sql
+CALL calc_Fine(14, 'Operating System');
+CALL calc_Fine(27, 'Object Oriented Programming');
+CALL calc_Fine(34, 'Microprocessor');
+CALL calc_Fine(48, 'Mechanics');
+```
+- These are calls to the `calc_Fine` procedure for each borrower.
+- For each call, the roll number (`r`) and the name of the book (`b`) are passed to the procedure to calculate the fine.
+- The fine is then inserted into the `Fine` table for each borrower.
+
+### 3. **Creating the Procedure to Submit a Book (`submit`)**
+
+#### **Procedure Definition**:
+```sql
+DELIMITER //
+CREATE PROCEDURE submit(IN r INT)
+BEGIN
+    -- Update the Borrower's status to 'R' (Returned)
+    UPDATE Borrower SET Status = 'R' WHERE Rollno = r;
+```
+- **`submit`**: This procedure is used to update the status of a borrowed book when it's returned.
+- **`IN r INT`**: The input parameter `r` is the roll number of the student whose book is being returned.
+  
+- **UPDATE Borrower SET Status = 'R'**: This query updates the `Status` of the borrower in the `Borrower` table to `'R'` (Returned), indicating the book has been returned.
+
+#### **Deleting Fines Associated with the Borrower**:
+```sql
+    DELETE FROM Fine WHERE Rollno = r;
+END //
+DELIMITER ;
+```
+- **DELETE FROM Fine WHERE Rollno = r**: This query deletes any fines associated with the given `Rollno` (student). After the book is returned, the fine record is removed from the `Fine` table.
+- **END //**: Marks the end of the `submit` procedure.
+
+### 4. **Calling the `submit` Procedure**
+
+```sql
+CALL submit(14);
+CALL submit(27);
+CALL submit(48);
+CALL submit(34);
+```
+- These calls mark the books for the given roll numbers as returned and remove the fines associated with each borrower.
+
+### Summary of the PL/SQL Process:
+1. **Fine Calculation (`calc_Fine`)**:
+   - Fetches the issue date of the book.
+   - Calculates the number of days the book is overdue.
+   - Computes the fine based on the overdue days and inserts it into the `Fine` table.
+
+2. **Book Submission (`submit`)**:
+   - Marks the book as returned by updating the `Status` of the borrower.
+   - Deletes any fines associated with the borrower from the `Fine` table.
+
+By using these stored procedures, the system effectively manages fines for overdue books and ensures that the data is updated when books are returned.

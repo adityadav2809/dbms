@@ -1,0 +1,225 @@
+-- Step 1: Create the Library Table
+CREATE TABLE Library (
+    rollnum INT,
+    name VARCHAR(100),
+    issuedate DATE,
+    bookname VARCHAR(100)
+);
+
+-- Step 2: Create the Library_Audit Table
+CREATE TABLE Library_Audit (
+    rollnum INT,
+    name VARCHAR(100),
+    issuedate DATE,
+    bookname VARCHAR(100),
+    operationTime TIMESTAMP
+);
+
+-- Step 3: Insert Sample Data into the Library Table
+INSERT INTO Library VALUES
+(1, 'Aditi', '2021-08-15', 'JAVA'),
+(2, 'Aditya', '2021-08-01', 'DBMS'),
+(3, 'Anurag', '2021-08-31', 'TOC'),
+(4, 'Asim', '2021-09-10', 'CNS'),
+(5, 'Aryan', '2021-09-04', 'DS'),
+(6, 'Aneesh', '2021-08-20', 'HCI'),
+(7, 'Abhishek', '2021-08-13', 'PYTHON');
+
+-- Step 4: Create the BEFORE UPDATE Trigger
+DELIMITER //
+CREATE TRIGGER before_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+
+-- Step 5: Create the AFTER UPDATE Trigger
+DELIMITER //
+CREATE TRIGGER after_update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (NEW.rollnum, NEW.name, NEW.issuedate, NEW.bookname, NOW());
+END;
+//
+DELIMITER ;
+
+-- Step 6: Create the BEFORE DELETE Trigger
+DELIMITER //
+CREATE TRIGGER before_delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+
+-- Step 7: Create the AFTER DELETE Trigger
+DELIMITER //
+CREATE TRIGGER after_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+
+-- Testing: Update Operation
+UPDATE Library SET bookname = 'C++' WHERE rollnum = 1;
+
+-- Testing: Delete Operation
+DELETE FROM Library WHERE rollnum = 7;
+
+-- Step 8: Verify the Results
+SELECT * FROM Library;
+
+SELECT * FROM Library_Audit;
+
+
+
+
+
+
+
+
+
+
+
+
+
+### **4. Create the `BEFORE UPDATE` Trigger**
+
+```sql
+DELIMITER //
+CREATE TRIGGER before_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+```
+
+- **`DELIMITER //`**: Changes the statement delimiter temporarily from `;` to `//` so that we can define multiple statements within the trigger body without prematurely terminating it.
+- **`CREATE TRIGGER before_update`**: This creates a trigger that is activated **before** any **UPDATE** operation on the `Library` table.
+  - **`BEFORE UPDATE ON Library`**: This part specifies that the trigger should execute before any update is made to the `Library` table.
+  - **`FOR EACH ROW`**: This ensures the trigger is fired for each row affected by the update operation.
+  - **`BEGIN ... END`**: This block contains the logic of the trigger.
+    - **`INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW())`**: Before the update occurs, we log the existing data (`OLD`) into the `Library_Audit` table. The `OLD` values represent the current state of the row before the update.
+    - **`NOW()`**: This function records the timestamp when the operation occurs.
+- **`DELIMITER ;`**: Resets the delimiter back to `;` after the trigger definition.
+
+This trigger will ensure that whenever an update happens in the `Library` table, the old values of the row are inserted into the `Library_Audit` table.
+
+---
+
+### **5. Create the `AFTER UPDATE` Trigger**
+
+```sql
+DELIMITER //
+CREATE TRIGGER after_update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (NEW.rollnum, NEW.name, NEW.issuedate, NEW.bookname, NOW());
+END;
+//
+DELIMITER ;
+```
+
+- **`CREATE TRIGGER after_update`**: This trigger is activated **after** an **UPDATE** operation on the `Library` table.
+  - **`AFTER UPDATE ON Library`**: This specifies that the trigger should execute after an update is made to the `Library` table.
+  - **`FOR EACH ROW`**: This ensures the trigger fires for each row affected by the update.
+  - **`BEGIN ... END`**: The trigger logic:
+    - **`INSERT INTO Library_Audit VALUES (NEW.rollnum, NEW.name, NEW.issuedate, NEW.bookname, NOW())`**: This inserts the updated data (`NEW`) into the `Library_Audit` table.
+    - **`NOW()`**: This records the timestamp of when the update occurred.
+  
+This trigger ensures that the updated data in `Library` is logged in `Library_Audit` after the update is completed.
+
+---
+
+### **6. Create the `BEFORE DELETE` Trigger**
+
+```sql
+DELIMITER //
+CREATE TRIGGER before_delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+```
+
+- **`CREATE TRIGGER before_delete`**: This trigger is activated **before** any **DELETE** operation on the `Library` table.
+  - **`BEFORE DELETE ON Library`**: This specifies that the trigger fires before a record is deleted from the `Library` table.
+  - **`FOR EACH ROW`**: This ensures the trigger fires for each row being deleted.
+  - **`BEGIN ... END`**: The trigger logic:
+    - **`INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW())`**: Before the row is deleted, it logs the existing values (`OLD`) into `Library_Audit`.
+    - **`NOW()`**: This records the timestamp of when the delete operation occurred.
+  
+This trigger ensures that before any deletion occurs in the `Library` table, the record being deleted is logged.
+
+---
+
+### **7. Create the `AFTER DELETE` Trigger**
+
+```sql
+DELIMITER //
+CREATE TRIGGER after_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW());
+END;
+//
+DELIMITER ;
+```
+
+- **`CREATE TRIGGER after_delete`**: This trigger is activated **after** any **DELETE** operation on the `Library` table.
+  - **`AFTER DELETE ON Library`**: This specifies that the trigger fires after a record is deleted from the `Library` table.
+  - **`FOR EACH ROW`**: This ensures the trigger fires for each row deleted.
+  - **`BEGIN ... END`**: The trigger logic:
+    - **`INSERT INTO Library_Audit VALUES (OLD.rollnum, OLD.name, OLD.issuedate, OLD.bookname, NOW())`**: After the row is deleted, it logs the deleted data (`OLD`) into `Library_Audit`.
+    - **`NOW()`**: This records the timestamp of when the delete operation occurred.
+
+This trigger ensures that after any deletion, the removed record is logged in `Library_Audit`.
+
+---
+
+### **8. Testing the Triggers (Update and Delete)**
+
+```sql
+UPDATE Library SET bookname = 'C++' WHERE rollnum = 1;
+DELETE FROM Library WHERE rollnum = 7;
+```
+
+- **`UPDATE Library SET bookname = 'C++' WHERE rollnum = 1;`**: This updates the book name for the student with `rollnum = 1` to 'C++'. The `BEFORE UPDATE` and `AFTER UPDATE` triggers will fire, logging both the old and new values in the `Library_Audit` table.
+- **`DELETE FROM Library WHERE rollnum = 7;
+
+`**: This deletes the row where `rollnum = 7`. The `BEFORE DELETE` and `AFTER DELETE` triggers will fire, logging the old values in the `Library_Audit` table.
+
+---
+
+### **9. Verify the Results**
+
+```sql
+SELECT * FROM Library;
+SELECT * FROM Library_Audit;
+```
+
+- **`SELECT * FROM Library;`**: This query retrieves the current state of the `Library` table after the update and delete operations.
+- **`SELECT * FROM Library_Audit;`**: This query retrieves the audit log from the `Library_Audit` table, showing the changes (updates and deletions) with timestamps.
+
+---
+
+### **Conclusion**
+
+This setup allows you to track every change made to the `Library` table by recording the old and new values (before and after) along with a timestamp in the `Library_Audit` table. The use of triggers ensures that any update or delete operation is automatically logged, providing an audit trail for your library management system.

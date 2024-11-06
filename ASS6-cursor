@@ -1,0 +1,196 @@
+-- Create the tables
+CREATE TABLE oldEmp (
+  rollNum INT PRIMARY KEY,
+  name VARCHAR(100),
+  salary INT
+);
+
+INSERT INTO oldEmp VALUES
+  (1, 'Aditi', 50000),
+  (2, 'Aditya', 49000),
+  (3, 'Anurag', 55000),
+  (4, 'Asim', 60000),
+  (5, 'Aryan', 57000),
+  (6, 'Aneesh', 54000),
+  (7, 'Abhishek', 52000),
+  (8, 'Amit', 51000),
+  (9, 'Anay', 58000);
+
+SELECT * FROM oldEmp;
+
+CREATE TABLE newEmp (
+  rollNum INT PRIMARY KEY,
+  name VARCHAR(100),
+  salary INT
+);
+
+INSERT INTO newEmp VALUES
+  (2, 'Aditya', 49000),
+  (5, 'Aryan', 57000),
+  (6, 'Aneesh', 54000),
+  (9, 'Anay', 58000);
+
+SELECT * FROM newEmp;
+
+-- Create the stored procedure
+DELIMITER //
+
+CREATE PROCEDURE compareTables()
+BEGIN
+  DECLARE r INT;
+  DECLARE n VARCHAR(100);
+  DECLARE s INT;
+  DECLARE c INT;
+  DECLARE exit_loop BOOLEAN DEFAULT FALSE;
+
+  -- Cursor declaration
+  DECLARE cur CURSOR FOR SELECT rollNum, name, salary FROM oldEmp;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET exit_loop = TRUE;
+
+  -- Open the cursor
+  OPEN cur;
+
+  -- Loop through the records in oldEmp
+  simple_loop: LOOP
+    FETCH cur INTO r, n, s;
+    IF exit_loop THEN
+      CLOSE cur;
+      LEAVE simple_loop;
+    END IF;
+
+    -- Check if the record exists in newEmp
+    SELECT COUNT(rollNum) INTO c FROM newEmp WHERE rollNum = r;
+    
+    -- If the record does not exist, insert it into newEmp
+    IF c = 0 THEN
+      INSERT INTO newEmp VALUES (r, n, s);
+    END IF;
+  END LOOP simple_loop;
+END;
+//
+
+DELIMITER ;
+
+-- Call the procedure
+CALL compareTables();
+
+-- Display the updated newEmp table
+SELECT * FROM newEmp;
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+### **7. Creating the `compareTables` Stored Procedure**
+
+```sql
+DELIMITER //
+
+CREATE PROCEDURE compareTables()
+BEGIN
+  DECLARE r INT;
+  DECLARE n VARCHAR(100);
+  DECLARE s INT;
+  DECLARE c INT;
+  DECLARE exit_loop BOOLEAN DEFAULT FALSE;
+
+  -- Cursor declaration
+  DECLARE cur CURSOR FOR SELECT rollNum, name, salary FROM oldEmp;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET exit_loop = TRUE;
+
+  -- Open the cursor
+  OPEN cur;
+
+  -- Loop through the records in oldEmp
+  simple_loop: LOOP
+    FETCH cur INTO r, n, s;
+    IF exit_loop THEN
+      CLOSE cur;
+      LEAVE simple_loop;
+    END IF;
+
+    -- Check if the record exists in newEmp
+    SELECT COUNT(rollNum) INTO c FROM newEmp WHERE rollNum = r;
+    
+    -- If the record does not exist, insert it into newEmp
+    IF c = 0 THEN
+      INSERT INTO newEmp VALUES (r, n, s);
+    END IF;
+  END LOOP simple_loop;
+END //
+DELIMITER ;
+```
+
+#### **Breaking down the `compareTables` procedure:**
+
+1. **`DELIMITER //`**: Changes the statement delimiter from the default semicolon (`;`) to `//` so that multiple statements in the procedure can be executed without interference from the semicolon used in the statements themselves. The delimiter is reset to `;` at the end.
+
+2. **`CREATE PROCEDURE compareTables()`**: This creates a stored procedure called `compareTables`. This procedure compares the records in the `oldEmp` table with the records in the `newEmp` table and inserts any missing records from `oldEmp` into `newEmp`.
+
+3. **Variable Declarations**:
+   - **`DECLARE r INT;`**: Declares a variable `r` to hold the `rollNum` from the `oldEmp` table.
+   - **`DECLARE n VARCHAR(100);`**: Declares a variable `n` to hold the `name` of the employee.
+   - **`DECLARE s INT;`**: Declares a variable `s` to hold the `salary` of the employee.
+   - **`DECLARE c INT;`**: Declares a variable `c` to store the count of rows in `newEmp` matching the `rollNum` of `oldEmp`.
+   - **`DECLARE exit_loop BOOLEAN DEFAULT FALSE;`**: Declares a flag to exit the loop when all records have been processed.
+
+4. **Cursor Declaration**:
+   - **`DECLARE cur CURSOR FOR SELECT rollNum, name, salary FROM oldEmp;`**: This creates a cursor `cur` that fetches the `rollNum`, `name`, and `salary` columns from `oldEmp`.
+   - **`DECLARE CONTINUE HANDLER FOR NOT FOUND SET exit_loop = TRUE;`**: This declares a handler that will set the `exit_loop` flag to `TRUE` when there are no more records to fetch (i.e., when the cursor has processed all rows).
+
+5. **Opening the Cursor**:
+   - **`OPEN cur;`**: This opens the cursor so it can start fetching records from `oldEmp`.
+
+6. **Looping through the Records**:
+   - **`simple_loop: LOOP`**: This is the start of a loop that processes each record fetched by the cursor.
+   - **`FETCH cur INTO r, n, s;`**: This fetches the next row from the cursor and assigns the values to the `r`, `n`, and `s` variables.
+   - **`IF exit_loop THEN CLOSE cur; LEAVE simple_loop; END IF;`**: If the `exit_loop` flag is set to `TRUE` (indicating no more records), it closes the cursor and exits the loop.
+   
+7. **Checking if the Record Exists in `newEmp`**:
+   - **`SELECT COUNT(rollNum) INTO c FROM newEmp WHERE rollNum = r;`**: This checks if the `rollNum` from the `oldEmp` table exists in the `newEmp` table. It stores the count of matching rows in the `c` variable.
+
+8. **Inserting Missing Records**:
+   - **`IF c = 0 THEN INSERT INTO newEmp VALUES (r, n, s); END IF;`**: If the count `c` is 0 (meaning the `rollNum` does not exist in `newEmp`), it inserts the record from `oldEmp` into `newEmp`.
+
+9. **Closing the Cursor and Exiting the Loop**:
+   - The loop continues to process each record in `oldEmp` until all records are fetched, after which the cursor is closed, and the procedure ends.
+
+---
+
+### **8. Calling the `compareTables` Procedure**
+
+```sql
+CALL compareTables();
+```
+- This `CALL` statement invokes the `compareTables` procedure. When this procedure is called, it will compare the `oldEmp` table with the `newEmp` table and insert any missing records from `oldEmp` into `newEmp`.
+
+---
+
+### **9. Displaying the Updated `newEmp` Table**
+
+```sql
+SELECT * FROM newEmp;
+```
+- This `SELECT` statement retrieves all records from the `newEmp` table after the `compareTables` procedure has been executed. It will show the updated list of employees, where any missing records from `oldEmp` will have been added.
+
+---
+
+### **Summary of Workflow:**
+
+1. **Create two tables (`oldEmp` and `newEmp`)** and insert sample employee data.
+2. **Define a stored procedure (`compareTables`)** to compare the `oldEmp` and `newEmp` tables and insert missing records from `oldEmp` into `newEmp`.
+3. **Call the stored procedure** to sync the two tables.
+4. **Display the updated `newEmp` table** to confirm that missing records have
+
+ been inserted.
+
+
